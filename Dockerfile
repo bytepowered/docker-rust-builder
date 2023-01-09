@@ -10,18 +10,12 @@ RUN adduser \
     --gecos "" \
     --home "/home/rust" \
     --shell "/sbin/nologin" \
-    --no-create-home \
     --uid "${UID}" \
     "${USER}"
-
-RUN mkdir -p /home/rust/.cargo && \
-    chown -R rust:rust /home/rust/.cargo
 
 RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak && \
     sed -i 's/deb.debian.org/mirrors.cloud.tencent.com/g' /etc/apt/sources.list && \
     sed -i 's/security.debian.org/mirrors.cloud.tencent.com/g' /etc/apt/sources.list
-
-COPY ./config /home/rust/.cargo/config
 
 RUN apt-get update && \
     export DEBIAN_FRONTEND=noninteractive && \
@@ -43,4 +37,15 @@ RUN apt-get update && \
         unzip \
         xutils-dev \
         && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    git config --global credential.https://github.com.helper ghtoken
+
+USER rust
+
+RUN mkdir -p ~/.cargo && \
+    echo "[source.crates-io]" > ~/.cargo/config && \
+    echo 'replace-with = "ustc"' >> ~/.cargo/config && \
+    echo "[source.ustc]" >> ~/.cargo/config && \
+    echo 'registry = "https://mirrors.ustc.edu.cn/crates.io-index"' >> ~/.cargo/config
+
+WORKDIR /home/rust
