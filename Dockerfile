@@ -17,6 +17,10 @@ RUN adduser \
 RUN mkdir -p /home/rust/.cargo && \
     chown -R rust:rust /home/rust/.cargo
 
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak && \
+    sed -i 's/deb.debian.org/mirrors.cloud.tencent.com/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/mirrors.cloud.tencent.com/g' /etc/apt/sources.list
+
 COPY ./config /home/rust/.cargo/config
 
 RUN apt-get update && \
@@ -39,5 +43,4 @@ RUN apt-get update && \
         unzip \
         xutils-dev \
         && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    useradd rust --user-group --create-home --shell /bin/bash --groups sudo
+    apt-get clean && rm -rf /var/lib/apt/lists/*
